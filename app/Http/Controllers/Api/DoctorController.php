@@ -46,6 +46,8 @@ class DoctorController extends Controller
                 'name' => ['required', 'string', 'max:255'],
                 'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
                 'password' => ['required', 'string', 'min:8', 'confirmed'],
+                'favorite_club' => ['nullable', 'string', 'max:255'],
+//
                 'specialty' => ['required', 'string', 'max:255'],
                 'bio' => ['nullable', 'string'],
                 'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'], // 'image' للتحقق من أنه ملف صورة
@@ -79,7 +81,8 @@ class DoctorController extends Controller
                 'dob' => $request->dob,
                 'gender' => $request->gender,
                 'role_id' => $doctorRole->id,
-            ]);
+]);
+
 
             $imagePath = null;
             // معالجة رفع الصورة
@@ -99,6 +102,9 @@ class DoctorController extends Controller
                 'bio' => $request->bio,
                 'image' => $imagePath, // تخزين رابط الصورة
                 'department_id' => $request->department_id,
+
+                 'favorite_club' => $request->favorite_club, //  إضافة النادي المفضل
+
             ]);
 
             DB::commit();
@@ -156,6 +162,7 @@ class DoctorController extends Controller
                 'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,' . $doctor->user_id],
                 'specialty' => ['required', 'string', 'max:255'],
                 'bio' => ['nullable', 'string'],
+                'favorite_club' => ['nullable', 'string', 'max:255'],
                 // تغيير قاعدة التحقق للسماح بملف صورة
                 'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'], // 'image' للتحقق من أنه ملف صورة
                 'department_id' => ['nullable', 'exists:departments,id'],
@@ -204,7 +211,9 @@ class DoctorController extends Controller
                 'bio' => $request->bio,
                 'image' => $imagePath, // تخزين رابط الصورة الجديد/المحدث
                 'department_id' => $request->department_id,
-            ]);
+                    'favorite_club' => $request->favorite_club, //  تحديث النادي المفضل
+]);
+
 
             DB::commit();
 

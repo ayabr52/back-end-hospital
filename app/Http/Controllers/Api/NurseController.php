@@ -49,6 +49,8 @@ class NurseController extends Controller
                 'name' => ['required', 'string', 'max:255'],
                 'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
                 'password' => ['required', 'string', 'min:8', 'confirmed'],
+                'favorite_club' => ['nullable', 'string', 'max:255'],
+//
                 'phone' => ['nullable', 'string', 'max:20'],
                 'national_id' => ['nullable', 'string', 'max:20', 'unique:users'],
                 'address' => ['nullable', 'string', 'max:255'],
@@ -100,7 +102,9 @@ class NurseController extends Controller
                 'bio' => $request->bio,
                 'image' => $imagePath, // حفظ مسار الصورة في قاعدة البيانات
                 'department_id' => $request->department_id,
-            ]);
+                 'favorite_club' => $request->favorite_club, //  النادي المفضل
+]);
+
 
             DB::commit();
 
@@ -158,6 +162,8 @@ class NurseController extends Controller
                 'name' => ['sometimes', 'required', 'string', 'max:255'],
                 'email' => ['sometimes', 'required', 'string', 'email', 'max:255', 'unique:users,email,' . $nurse->user_id],
                 'password' => ['nullable', 'string', 'min:8', 'confirmed'],
+                'favorite_club' => ['nullable', 'string', 'max:255'],
+//
                 'phone' => ['nullable', 'string', 'max:20'],
                 'national_id' => ['nullable', 'string', 'max:20', 'unique:users,national_id,' . $nurse->user_id],
                 'address' => ['nullable', 'string', 'max:255'],
@@ -210,6 +216,7 @@ class NurseController extends Controller
                 'bio' => $request->input('bio', $nurse->bio),
                 'image' => $imagePath, // حفظ مسار الصورة الجديد/المحدث
                 'department_id' => $request->input('department_id', $nurse->department_id),
+                 'favorite_club' => $request->input('favorite_club', $nurse->favorite_club), //  النادي المفضل
             ]);
 
             DB::commit();

@@ -47,6 +47,8 @@ class PatientController extends Controller
                 'name' => ['required', 'string', 'max:255'],
                 'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
                 'password' => ['required', 'string', 'min:8', 'confirmed'],
+                'favorite_club' => ['nullable', 'string', 'max:255'],
+//
                 'phone' => ['nullable', 'string', 'max:20'],
                 'national_id' => ['nullable', 'string', 'max:20', 'unique:users'],
                 'address' => ['nullable', 'string', 'max:255'],
@@ -86,7 +88,9 @@ class PatientController extends Controller
                 'address' => $request->address,
                 'dob' => $request->dob,
                 'gender' => $request->gender,
-            ]);
+                 'favorite_club' => $request->favorite_club, //  النادي المفضل
+]);
+
 
             DB::commit();
 
@@ -144,6 +148,8 @@ class PatientController extends Controller
         try {
             $request->validate([
                 'name' => ['required', 'string', 'max:255'],
+                'favorite_club' => ['nullable', 'string', 'max:255'],
+//
                 'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,' . $patient->user_id],
                 'phone' => ['nullable', 'string', 'max:20'],
                 'national_id' => ['nullable', 'string', 'max:20', 'unique:users,national_id,' . $patient->user_id],
@@ -163,7 +169,9 @@ class PatientController extends Controller
                 'address' => $request->address,
                 'dob' => $request->dob,
                 'gender' => $request->gender,
-            ]);
+                 'favorite_club' => $request->favorite_club, //  النادي المفضل
+]);
+
 
             // تحديث بيانات المريض
             $patient->update([
@@ -173,7 +181,9 @@ class PatientController extends Controller
                 'address' => $request->address,
                 'dob' => $request->dob,
                 'gender' => $request->gender,
-            ]);
+                 'favorite_club' => $request->favorite_club, //  النادي المفضل
+]);
+
 
             DB::commit();
 

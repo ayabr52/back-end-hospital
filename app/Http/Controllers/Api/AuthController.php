@@ -24,6 +24,8 @@ public function register(Request $request)
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'favorite_club' => ['nullable', 'string', 'max:255'],
+//
             'phone' => ['nullable', 'string', 'max:20'],
             'national_id' => ['nullable', 'string', 'max:20', 'unique:users'],
             'address' => ['nullable', 'string', 'max:255'],
@@ -63,7 +65,9 @@ public function register(Request $request)
             'address' => $user->address,
             'dob' => $user->dob,
             'gender' => $user->gender,
-        ]);
+               'favorite_club' => $request->favorite_club, //  النادي المفضل
+]);
+
 
         // إنشاء رمز مميز (token) للمستخدم
         $token = $user->createToken('auth_token')->plainTextToken;

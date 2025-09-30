@@ -42,8 +42,7 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::middleware('auth:sanctum')->post('/logout', [AuthController::class, 'logout']);
 
 // --------------------- مسار التحقق من كلمة السر ------------------
-Route::post('/verify-club', [AuthController::class, 'verifyFavoriteClub']);
-
+Route::post('/verify-club', [AuthController::class, 'verifyClub']);
 
  // -------------------- مسارات النصائح --------------------
 Route::middleware(['auth:sanctum', 'role:admin,doctor'])->group(function () {
@@ -82,8 +81,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/patients', [PatientController::class, 'store'])->middleware('role:admin,receptionist,doctor,nurse');
     // يمكن للمدير، موظف الاستقبال، أو المريض نفسه رؤية تفاصيله
     Route::get('/patients/{patient}', [PatientController::class, 'show']);
-    // يمكن للمدير أو المريض نفسه تحديث بياناته
-    Route::put('/patients/{patient}', [PatientController::class, 'update']);
+    // يمكن للمدير أو المريض نفسه تحديث بياناته AYA
+   Route::put('/patients/{patient}', [PatientController::class, 'update'])->middleware('role:admin,patient');
     // يمكن للمدير و للممرض  حذف المرضى  AYA
     Route::delete('/patients/{patient}', [PatientController::class, 'destroy'])->middleware('role:admin|nurse');
 });
