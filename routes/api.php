@@ -16,6 +16,7 @@ use App\Http\Controllers\Api\AppointmentController;
 use App\Http\Controllers\Api\PrescriptionController;
 use App\Http\Controllers\Api\MedicalRecordController;
 use App\Http\Controllers\Api\InventoryController;
+use App\Http\Controllers\TipController;
 
 /*
 |--------------------------------------------------------------------------
@@ -40,12 +41,27 @@ Route::post('/login', [AuthController::class, 'login']);
 // مسار تسجيل الخروج (يتطلب مصادقة)
 Route::middleware('auth:sanctum')->post('/logout', [AuthController::class, 'logout']);
 
+// --------------------- مسار التحقق من كلمة السر ------------------
+Route::post('/verify-club', [AuthController::class, 'verifyFavoriteClub']);
+
+
+ // -------------------- مسارات النصائح --------------------
+Route::middleware(['auth:sanctum', 'role:admin,doctor'])->group(function () {
+    Route::post('/tips', [TipController::class, 'store']);
+    Route::put('/tips/{tip}', [TipController::class, 'update']);
+    Route::delete('/tips/{tip}', [TipController::class, 'destroy']);
+});
+
+Route::get('/tips', [TipController::class, 'index']); // متاح للجميع
+Route::get('/tips/{tip}', [TipController::class, 'show']); // متاح للجميع
+
+
 // مسارات إدارة الأقسام (تتطلب مصادقة ودور "admin")
 Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
     Route::apiResource('departments', DepartmentController::class);
 });
 
-Route::get('/departments', [DepartmentController::class, 'index']); 
+Route::get('/departments', [DepartmentController::class, 'index']);
 
 // مسارات الأطباء
 Route::get('/doctors', [DoctorController::class, 'index']); // يمكن للجميع رؤية الأطباء
@@ -62,14 +78,14 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
 Route::middleware('auth:sanctum')->group(function () {
     // يمكن للمدير وموظف الاستقبال رؤية قائمة المرضى
     Route::get('/patients', [PatientController::class, 'index'])->middleware('role:admin,receptionist,doctor');
-    // يمكن للمدير وموظف الاستقبال إنشاء مرضى جدد
-    Route::post('/patients', [PatientController::class, 'store'])->middleware('role:admin,receptionist,doctor');
+    // يمكن للمدير وموظف الاستقبال إنشاء مرضى جدد      صار ممكن للمرض كمان AYA
+    Route::post('/patients', [PatientController::class, 'store'])->middleware('role:admin,receptionist,doctor,nurse');
     // يمكن للمدير، موظف الاستقبال، أو المريض نفسه رؤية تفاصيله
     Route::get('/patients/{patient}', [PatientController::class, 'show']);
     // يمكن للمدير أو المريض نفسه تحديث بياناته
     Route::put('/patients/{patient}', [PatientController::class, 'update']);
-    // يمكن للمدير فقط حذف المرضى
-    Route::delete('/patients/{patient}', [PatientController::class, 'destroy'])->middleware('role:admin');
+    // يمكن للمدير و للممرض  حذف المرضى  AYA
+    Route::delete('/patients/{patient}', [PatientController::class, 'destroy'])->middleware('role:admin|nurse');
 });
 
 // مسارات المواعيد (تتطلب مصادقة لمعظم العمليات)

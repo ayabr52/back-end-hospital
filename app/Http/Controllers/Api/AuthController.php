@@ -146,13 +146,43 @@ public function register(Request $request)
      * @return \Illuminate\Http\JsonResponse
      */
     public function logout(Request $request)
-    {
-        // حذف الرمز المميز الحالي الذي يستخدمه المستخدم
-        $request->user()->currentAccessToken()->delete();
+{
+    $token = $request->user()->currentAccessToken();
 
-        return response()->json([
-            'message' => 'تم تسجيل الخروج بنجاح.',
-            'status' => 'success'
-        ], 200);
+    if ($token) {
+        $token->delete();
     }
+
+    return response()->json([
+        'message' => 'تم تسجيل الخروج بنجاح.',
+        'status' => 'success'
+    ], 200);
+}
+
+
+
+  // التحقق حسب جدول النادي المفضل
+   public function verifyClub(Request $request)
+{
+    $request->validate([
+        'email' => 'required|email',
+        'favorite_club' => 'required|string',
+    ]);
+
+    $user = User::where('email', $request->email)->first();
+
+    if (!$user) {
+        return response()->json(['message' => 'المستخدم غير موجود'], 404);
+    }
+
+    $profile = $user->doctor ?? $user->nurse ?? $user->patient ;
+
+    if ($profile && $profile->favorite_club === $request->favorite_club) {
+        return response()->json(['message' => 'تم التحقق بنجاح']);
+    }
+
+    return response()->json(['message' => 'اسم النادي غير صحيح'], 403);
+}
+
+
 }

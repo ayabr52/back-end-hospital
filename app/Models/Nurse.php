@@ -16,6 +16,7 @@ class Nurse extends Model
      */
     protected $fillable = [
         'user_id',
+         'favorite_club',
         'name',
         'phone',
         'specialty',

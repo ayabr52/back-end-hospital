@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Patient; 
-use App\Models\User;    
-use App\Models\Role;   
+use App\Models\Patient;
+use App\Models\User;
+use App\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Hash;
@@ -204,6 +204,7 @@ class PatientController extends Controller
      * @param  \App\Models\Patient  $patient
      * @return \Illuminate\Http\JsonResponse
      */
+    // هون بدهم كمان الممرض يحذف المرضى مش بس المدير ِ AYA
     public function destroy(Patient $patient)
     {
         // يمكن للمدير فقط حذف المرضى

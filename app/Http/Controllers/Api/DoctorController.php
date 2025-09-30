@@ -22,7 +22,7 @@ class DoctorController extends Controller
      */
     public function index()
     {
-        $doctors = Doctor::with('department', 'user')->get();
+        $doctors = Doctor::with('department', 'user')->take(8)->get();
         return response()->json([
             'message' => 'تم جلب الأطباء بنجاح.',
             'doctors' => $doctors,
