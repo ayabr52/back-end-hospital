@@ -169,7 +169,7 @@ class PatientController extends Controller
                 'address' => $request->address,
                 'dob' => $request->dob,
                 'gender' => $request->gender,
-                 'favorite_club' => $request->favorite_club, //  النادي المفضل
+                 
 ]);
 
 

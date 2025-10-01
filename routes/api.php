@@ -54,6 +54,11 @@ Route::middleware(['auth:sanctum', 'role:admin,doctor'])->group(function () {
 Route::get('/tips', [TipController::class, 'index']); // متاح للجميع
 Route::get('/tips/{tip}', [TipController::class, 'show']); // متاح للجميع
 
+// ------------------ مسار الحصول على الإشعارات للمستخدم المصادق عليه  -------------------
+Route::middleware('auth:sanctum')->get('/notifications', function () {
+    return auth()->user()->notifications;
+});
+
 
 // مسارات إدارة الأقسام (تتطلب مصادقة ودور "admin")
 Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {

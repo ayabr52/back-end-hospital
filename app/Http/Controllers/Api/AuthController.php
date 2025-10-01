@@ -9,6 +9,10 @@ use App\Models\Role; // استيراد موديل Role
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use App\Models\Patient;
+use App\Notifications\AppointmentReminderNotification;
+use App\Models\Appointment;
+
+
 class AuthController extends Controller
 {
     /**
@@ -99,49 +103,59 @@ public function register(Request $request)
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function login(Request $request)
-    {
-        try {
-            $request->validate([
-                'email' => 'required|email',
-                'password' => 'required',
-            ]);
+   public function login(Request $request)
+{
+    try {
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'required',
+        ]);
 
-            $user = User::where('email', $request->email)->first();
+        $user = User::where('email', $request->email)->first();
 
-            if (!$user || !Hash::check($request->password, $user->password)) {
-                return response()->json([
-                    'message' => 'بيانات الاعتماد غير صحيحة.',
-                    'status' => 'error'
-                ], 401);
-            }
-
-            // حذف الرموز المميزة القديمة للمستخدم (اختياري، يمكن الاحتفاظ بها)
-            // $user->tokens()->delete();
-
-            // إنشاء رمز مميز جديد
-            $token = $user->createToken('auth_token')->plainTextToken;
-
+        if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->json([
-                'message' => 'تم تسجيل الدخول بنجاح.',
-                'user' => $user,
-                'access_token' => $token,
-                'token_type' => 'Bearer',
-                'role' => $user->role->name // إرجاع اسم الدور
-            ], 200);
-
-        } catch (ValidationException $e) {
-            return response()->json([
-                'message' => 'خطأ في التحقق من صحة البيانات.',
-                'errors' => $e->errors()
-            ], 422);
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'حدث خطأ غير متوقع: ' . $e->getMessage(),
+                'message' => 'بيانات الاعتماد غير صحيحة.',
                 'status' => 'error'
-            ], 500);
+            ], 401);
         }
+
+        // إرسال إشعار إذا كان المريض ولديه موعد اليوم
+    if ($user->role->name === 'patient' && $user->patient) {
+    $appointment = Appointment::where('patient_id', $user->patient->id)
+      ->whereBetween('appointment_date', [now(), now()->addDay()])
+
+        ->where('status', 'confirmed')
+        ->first();
+       
+    if ($appointment) {
+        $user->notify(new AppointmentReminderNotification($appointment));
     }
+}
+
+        // إنشاء رمز مميز جديد
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        return response()->json([
+            'message' => 'تم تسجيل الدخول بنجاح.',
+            'user' => $user,
+            'access_token' => $token,
+            'token_type' => 'Bearer',
+            'role' => $user->role->name
+        ], 200);
+
+    } catch (ValidationException $e) {
+        return response()->json([
+            'message' => 'خطأ في التحقق من صحة البيانات.',
+            'errors' => $e->errors()
+        ], 422);
+    } catch (\Exception $e) {
+        return response()->json([
+            'message' => 'حدث خطأ غير متوقع: ' . $e->getMessage(),
+            'status' => 'error'
+        ], 500);
+    }
+}
 
     /**
      * Logout user (revoke token).

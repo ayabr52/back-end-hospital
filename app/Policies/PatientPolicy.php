@@ -49,11 +49,12 @@ class PatientPolicy
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, Patient $patient): bool
-    {
-        // يمكن للمدير فقط حذف المرضى
-        return $user->role->name === 'admin';
-    }
+public function delete(User $user, Patient $patient)
+{
+    //   المدير و الممرض يمكنهم الحذف 
+    return $user->role->name === 'admin' || $user->role->name === 'nurse';
+}
+
 
     /**
      * Determine whether the user can restore the model.
