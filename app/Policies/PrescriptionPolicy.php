@@ -51,8 +51,8 @@ class PrescriptionPolicy
      */
     public function create(User $user): bool
     {
-        // يمكن للمدير والطبيب فقط إنشاء وصفات أدوية
-        return $user->role->name === 'admin' || $user->role->name === 'doctor';
+        // يمكن للمدير والطبيب و الصيدلي إنشاء وصفات أدوية
+        return $user->role->name === 'admin' || $user->role->name === 'doctor'|| $user->role->name === 'pharmacist';
     }
 
     /**

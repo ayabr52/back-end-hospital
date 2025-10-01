@@ -21,12 +21,12 @@ class PrescriptionController extends Controller
      */
     public function index()
     {
-        // يمكن للمدير والطبيب رؤية جميع الوصفات
+        // يمكن للمدير والطبيب والصيدلي رؤية جميع الوصفات
         // المريض يرى وصفاته فقط
         $user = Auth::user();
         $prescriptions = collect();
 
-        if ($user->role->name === 'admin' || $user->role->name === 'doctor') {
+        if ($user->role->name === 'admin' || $user->role->name === 'doctor' || $user->role->name === 'pharmacist') {
             $prescriptions = Prescription::with('patient.user', 'doctor.user', 'medicines')->get();
         } elseif ($user->role->name === 'patient') {
             $patient = $user->patient;
@@ -55,7 +55,7 @@ class PrescriptionController extends Controller
      */
     public function store(Request $request)
     {
-        // يمكن للمدير والطبيب فقط إنشاء وصفات أدوية
+        // يمكن للمدير والطبيب و الصيدلي إنشاء وصفات أدوية
         $this->authorize('create', Prescription::class);
 
         try {

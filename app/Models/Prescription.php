@@ -15,11 +15,16 @@ class Prescription extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'patient_id',
-        'doctor_id',
-        'prescription_date',
-        'notes',
-    ];
+    'patient_id',
+    'doctor_id',
+    'medical_record_id', // ضروري جدًا
+    'prescription_date',
+    'notes',
+    'medication',
+    'dosage',
+    'instructions',
+];
+
 
     /**
      * The attributes that should be cast.
@@ -55,4 +60,12 @@ class Prescription extends Model
                     ->withPivot('dosage', 'frequency', 'duration', 'instructions')
                     ->withTimestamps();
     }
+   /**
+    * ربط الوصفة الطبية مع السجل الطبي
+    */
+    public function medicalRecord()
+{
+    return $this->belongsTo(MedicalRecord::class);
+}
+
 }

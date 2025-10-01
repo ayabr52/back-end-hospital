@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\MedicalRecord; // استيراد موديل MedicalRecord
 use App\Models\Patient;       // استيراد موديل Patient
 use App\Models\Doctor;        // استيراد موديل Doctor
+use App\Models\Prescription;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Auth; // لاستخدام المستخدم المصادق عليه
@@ -74,11 +75,26 @@ class MedicalRecordController extends Controller
                 'notes' => $request->notes,
             ]);
 
+
+    // إذا فيه وصفة مرفقة، أنشئها
+    if ($request->has('medication')) {
+     Prescription::create([
+    'medical_record_id' => $medicalRecord->id,
+    'patient_id' => $medicalRecord->patient_id,
+    'doctor_id' => Auth::user()->doctor->id ?? null,
+    'prescription_date' => now(), // ← أضفنا هذا السطر
+    'medication' => $request->medication,
+    'dosage' => $request->dosage,
+    'instructions' => $request->instructions,
+]);
+
+
+
             return response()->json([
                 'message' => 'تم إنشاء السجل الطبي بنجاح.',
                 'medical_record' => $medicalRecord->load('patient.user', 'doctor.user'),
                 'status' => 'success'
-            ], 201);
+            ], 201); }
 
         } catch (ValidationException $e) {
             return response()->json([

@@ -6,6 +6,10 @@ use App\Models\Inventory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
+use App\Models\Prescription;
+use App\Models\User;
+use App\Notifications\LowStockNotification;
+
 class InventoryController extends Controller
 {
     /**
@@ -19,6 +23,46 @@ class InventoryController extends Controller
         $items = Inventory::all();
         return response()->json($items, 200);
     }
+
+
+//**   دالة صرف الدواء وانقاصه من الستودع */
+public function dispenseFromPrescription(Request $request)
+{
+    $request->validate([
+        'prescription_id' => 'required|exists:prescriptions,id',
+    ]);
+
+    $prescription = Prescription::find($request->prescription_id);
+
+    // البحث عن الدواء في المستودع حسب اسم الدواء
+    $item = Inventory::where('item_name', $prescription->medication)->first();
+
+    if (!$item) {
+        return response()->json([
+            'message' => 'الدواء غير موجود في المستودع.',
+            'status' => 'error'
+        ], 404);
+    }
+
+    // خصم الكمية (مثلاً 1 وحدة لكل وصفة، أو حسب منطقك)
+    $item->quantity -= 1;
+    $item->save();
+
+    // إشعار إذا الكمية تحت 50
+  if ($item->quantity < 50) {
+        $admins = User::whereHas('role', fn($q) => $q->where('name', 'admin'))->get();
+        foreach ($admins as $admin) {
+            $admin->notify(new LowStockNotification($item));
+        }
+    }
+
+    return response()->json([
+        'message' => 'تم صرف الدواء بنجاح.',
+        'remaining_quantity' => $item->quantity,
+        'status' => 'success'
+    ]);
+}
+
 
     /**
      * Store a newly created resource in storage.

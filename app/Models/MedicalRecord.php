@@ -47,4 +47,13 @@ class MedicalRecord extends Model
     {
         return $this->belongsTo(Doctor::class);
     }
+  /**
+   * نربط السجل الطبي مع الوصفة الطبية 
+   */
+
+    public function prescription()
+{
+    return $this->hasOne(Prescription::class);
+}
+
 }

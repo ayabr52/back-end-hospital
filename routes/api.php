@@ -144,6 +144,13 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('prescriptions', PrescriptionController::class);
 });
+// -------------- مسار الوصفات الطبية للصيدلي -------------
+Route::middleware(['auth:sanctum', 'role:pharmacist'])->get('/prescriptions', [PrescriptionController::class, 'index']);
+Route::middleware(['auth:sanctum', 'role:pharmacist'])->post('/prescriptions', [PrescriptionController::class, 'store']);
+
+// ------------ مسار صرف الدواء ------------------
+Route::post('/inventory/dispense-from-prescription', [InventoryController::class, 'dispenseFromPrescription']);
+
 
 // --- مسارات الممرضين الجديدة والمعدلة ---
 
