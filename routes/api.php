@@ -81,7 +81,7 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
 // مسارات المرضى
 Route::middleware('auth:sanctum')->group(function () {
     // يمكن للمدير وموظف الاستقبال رؤية قائمة المرضى
-    Route::get('/patients', [PatientController::class, 'index'])->middleware('role:admin,receptionist,doctor');
+    Route::get('/patients', [PatientController::class, 'index'])->middleware('role:admin,receptionist,doctor,pharmacist');
     // يمكن للمدير وموظف الاستقبال إنشاء مرضى جدد      صار ممكن للمرض كمان AYA
     Route::post('/patients', [PatientController::class, 'store'])->middleware('role:admin,receptionist,doctor,nurse');
     // يمكن للمدير، موظف الاستقبال، أو المريض نفسه رؤية تفاصيله

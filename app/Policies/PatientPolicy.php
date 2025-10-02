@@ -51,7 +51,7 @@ class PatientPolicy
      */
 public function delete(User $user, Patient $patient)
 {
-    //   المدير و الممرض يمكنهم الحذف 
+    //   المدير و الممرض يمكنهم الحذف
     return $user->role->name === 'admin' || $user->role->name === 'nurse';
 }
 

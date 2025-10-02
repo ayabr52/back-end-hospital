@@ -54,8 +54,8 @@ class MedicalRecordPolicy
      */
     public function create(User $user): bool
     {
-        // يمكن للمدير والطبيب فقط إنشاء سجلات طبية
-        return $user->role->name === 'admin' || $user->role->name === 'doctor';
+        // يمكن للمدير والطبيب فقط إنشاء سجلات طبية + الصيدلي
+        return $user->role->name === 'admin' || $user->role->name === 'doctor' ||$user->role->name==='pharmacist';
     }
 
     /**
