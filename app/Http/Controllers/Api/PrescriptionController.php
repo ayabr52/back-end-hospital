@@ -58,49 +58,73 @@ class PrescriptionController extends Controller
         // يمكن للمدير والطبيب و الصيدلي إنشاء وصفات أدوية
         $this->authorize('create', Prescription::class);
 
-        try {
-            $request->validate([
-                'patient_id' => ['required', 'exists:patients,id'],
-                'prescription_date' => ['required', 'date', 'before_or_equal:today'],
-                'notes' => ['nullable', 'string'],
-                'medicines' => ['required', 'array', 'min:1'],
-                'medicines.*.medicine_id' => ['required', 'exists:medicines,id'],
-                'medicines.*.dosage' => ['required', 'string', 'max:255'],
-                'medicines.*.frequency' => ['required', 'string', 'max:255'],
-                'medicines.*.duration' => ['nullable', 'string', 'max:255'],
-                'medicines.*.instructions' => ['nullable', 'string'],
-            ]);
+         try {
+$request->validate([
+    'patient_id' => ['required', 'exists:patients,id'],
+    'prescription_date' => ['required', 'date', 'before_or_equal:today'],
+    'notes' => ['nullable', 'string'],
+    'doctor_id' => ['nullable', 'exists:doctors,id'],
+    'medicines' => ['required', 'array', 'min:1'],
+    'medicines.*.medicine_id' => ['required', 'exists:medicines,id'],
+    'medicines.*.dosage' => ['nullable', 'string', 'max:255'],
+    'medicines.*.frequency' => ['nullable', 'string', 'max:255'],
+    'medicines.*.duration' => ['nullable', 'string', 'max:255'],
+    'medicines.*.instructions' => ['nullable', 'string'],
+]);
+
+
 
             DB::beginTransaction();
 
+
+        // تحديد الطبيب حسب الدور أو من الطلب
+        $user = Auth::user();
+        $doctorId = null;
+
+        if ($user->role->name === 'doctor') {
+            $doctorId = $user->doctor->id;
+        } elseif (in_array($user->role->name, ['admin', 'pharmacist'])) {
+            $doctorId = $request->doctor_id; // يجب أن يُمرر يدوياً
+        }
+
             $prescription = Prescription::create([
                 'patient_id' => $request->patient_id,
-                'doctor_id' => Auth::user()->role->name === 'doctor' ? Auth::user()->doctor->id : null, // إذا كان طبيباً، سجل معرفه
+                'doctor_id' => $doctorId, // إذا كان طبيباً، سجل معرفه
                 'prescription_date' => $request->prescription_date,
                 'notes' => $request->notes,
             ]);
+$medicinesToAttach = [];
+$user = Auth::user(); // المستخدم الحالي
 
-            $medicinesToAttach = [];
-            foreach ($request->medicines as $med) {
-                // يمكنك هنا إضافة منطق للتحقق من الكمية المتوفرة في المخزون وتحديثها
-                // Medicine::find($med['medicine_id'])->decrement('stock_quantity', 1); // مثال
+foreach ($request->medicines as $med) {
+    $medicineModel = Medicine::find($med['medicine_id']);
 
-                $medicinesToAttach[$med['medicine_id']] = [
-                    'dosage' => $med['dosage'],
-                    'frequency' => $med['frequency'],
-                    'duration' => $med['duration'] ?? null,
-                    'instructions' => $med['instructions'] ?? null,
-                ];
-            }
+    $dosage = $med['dosage'] ?? ($user->role->name === 'doctor' ? null : $medicineModel->strength);
+    $frequency = $med['frequency'] ?? ($user->role->name === 'doctor' ? null : 'مرة يومياً');
+    $duration = $med['duration'] ?? ($user->role->name === 'doctor' ? null : '5 أيام');
+    $instructions = $med['instructions'] ?? ($user->role->name === 'doctor' ? null : 'بعد الطعام');
+
+    $medicinesToAttach[$med['medicine_id']] = [
+        'dosage' => $dosage,
+        'frequency' => $frequency,
+        'duration' => $duration,
+        'instructions' => $instructions,
+    ];
+
+
+}
+
             $prescription->medicines()->attach($medicinesToAttach);
 
             DB::commit();
 
-            return response()->json([
-                'message' => 'تم إنشاء وصفة الدواء بنجاح.',
-                'prescription' => $prescription->load('patient.user', 'doctor.user', 'medicines'),
-                'status' => 'success'
-            ], 201);
+          return response()->json([
+    'message' => 'تم إنشاء وصفة الدواء بنجاح.',
+    'prescription' => $prescription->load('patient.user', 'doctor.user', 'medicines'),
+    'doctor_name' => optional($prescription->doctor->user)->name,
+    'status' => 'success'
+], 201);
+
 
         } catch (ValidationException $e) {
             DB::rollBack();

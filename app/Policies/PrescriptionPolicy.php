@@ -24,7 +24,7 @@ class PrescriptionPolicy
     public function view(User $user, Prescription $prescription): bool
     {
         // المدير يمكنه رؤية أي وصفة
-        if ($user->role->name === 'admin') {
+        if ($user->role->name === 'admin' || $user->role->name === 'pharmacist') {
             return true;
         }
 

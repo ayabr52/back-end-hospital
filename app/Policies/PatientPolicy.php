@@ -14,7 +14,7 @@ class PatientPolicy
     public function viewAny(User $user): bool
     {
         // يمكن للمدير وموظف الاستقبال والطبيب رؤية قائمة جميع المرضى
-        return $user->role->name === 'admin' || $user->role->name === 'receptionist' || $user->role->name === 'doctor';
+        return $user->role->name === 'admin' || $user->role->name === 'receptionist' || $user->role->name === 'doctor' || $user->role->name === 'pharmacist';
     }
 
     /**
@@ -51,7 +51,7 @@ class PatientPolicy
      */
 public function delete(User $user, Patient $patient)
 {
-    //   المدير و الممرض يمكنهم الحذف 
+    //   المدير و الممرض يمكنهم الحذف
     return $user->role->name === 'admin' || $user->role->name === 'nurse';
 }
 

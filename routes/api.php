@@ -81,13 +81,13 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
 // مسارات المرضى
 Route::middleware('auth:sanctum')->group(function () {
     // يمكن للمدير وموظف الاستقبال رؤية قائمة المرضى
-    Route::get('/patients', [PatientController::class, 'index'])->middleware('role:admin,receptionist,doctor');
+    Route::get('/patients', [PatientController::class, 'index'])->middleware('role:admin,receptionist,doctor,pharmacist');
     // يمكن للمدير وموظف الاستقبال إنشاء مرضى جدد      صار ممكن للمرض كمان AYA
-    Route::post('/patients', [PatientController::class, 'store'])->middleware('role:admin,receptionist,doctor,nurse');
+    Route::post('/patients', [PatientController::class, 'store'])->middleware('role:admin,receptionist,doctor,nurse,pharmacist');
     // يمكن للمدير، موظف الاستقبال، أو المريض نفسه رؤية تفاصيله
     Route::get('/patients/{patient}', [PatientController::class, 'show']);
     // يمكن للمدير أو المريض نفسه تحديث بياناته AYA
-   Route::put('/patients/{patient}', [PatientController::class, 'update'])->middleware('role:admin,patient');
+   Route::put('/patients/{patient}', [PatientController::class, 'update'])->middleware('role:admin,patient,pharmacist');
     // يمكن للمدير و للممرض  حذف المرضى  AYA
     Route::delete('/patients/{patient}', [PatientController::class, 'destroy'])->middleware('role:admin|nurse');
 });
@@ -144,6 +144,7 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('prescriptions', PrescriptionController::class);
 });
+
 // -------------- مسار الوصفات الطبية للصيدلي -------------
 Route::middleware(['auth:sanctum', 'role:pharmacist'])->get('/prescriptions', [PrescriptionController::class, 'index']);
 Route::middleware(['auth:sanctum', 'role:pharmacist'])->post('/prescriptions', [PrescriptionController::class, 'store']);
