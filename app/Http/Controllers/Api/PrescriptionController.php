@@ -235,28 +235,36 @@ foreach ($request->medicines as $med) {
      * @param  \App\Models\Prescription  $prescription
      * @return \Illuminate\Http\JsonResponse
      */
-    public function destroy(Prescription $prescription)
-    {
-        // يمكن للمدير فقط حذف وصفات الأدوية
-        $this->authorize('delete', $prescription);
+   public function destroy($id)
+{
+    // جلب الوصفة بناءً على الـ ID
+    $prescription = Prescription::findOrFail($id);
 
-        try {
-            DB::beginTransaction();
-            $prescription->medicines()->detach(); // فصل الأدوية المرتبطة أولاً
-            $prescription->delete();
+    // يمكن للمدير , الصيدلي  حذف وصفات الأدوية
+    $this->authorize('delete', $prescription);
 
-            DB::commit();
+    try {
+        DB::beginTransaction();
 
-            return response()->json([
-                'message' => 'تم حذف وصفة الدواء بنجاح.',
-                'status' => 'success'
-            ], 200);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json([
-                'message' => 'حدث خطأ أثناء حذف وصفة الدواء: ' . $e->getMessage(),
-                'status' => 'error'
-            ], 500);
-        }
+        // فصل الأدوية المرتبطة أولاً
+        $prescription->medicines()->detach();
+
+        // حذف الوصفة
+        $prescription->delete();
+
+        DB::commit();
+
+        return response()->json([
+            'message' => 'تم حذف وصفة الدواء بنجاح.',
+            'status' => 'success'
+        ], 200);
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return response()->json([
+            'message' => 'حدث خطأ أثناء حذف وصفة الدواء: ' . $e->getMessage(),
+            'status' => 'error'
+        ], 500);
     }
+}
+
 }

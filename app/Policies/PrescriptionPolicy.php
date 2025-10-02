@@ -79,7 +79,7 @@ class PrescriptionPolicy
     public function delete(User $user, Prescription $prescription): bool
     {
         // يمكن للمدير فقط حذف وصفات الأدوية
-        return $user->role->name === 'admin';
+        return $user->role->name === 'admin'|| $user->role->name === 'pharmacist';
     }
 
     /**
